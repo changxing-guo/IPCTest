@@ -7,9 +7,11 @@
     tools:context=".BindServiceTestActivity1">
 
     <TextView
-        android:id="@+id/name"
+        android:id="@+id/display"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="50dp"
+        android:textSize="40px"
+        android:text="ssss"/>
 
     <Button
         android:id="@+id/register"
@@ -22,6 +24,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="unregister" />
+
+    <Button
+        android:id="@+id/bt_display"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="maxValue" />
 
 
 </LinearLayout>

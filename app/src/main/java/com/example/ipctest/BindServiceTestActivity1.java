@@ -15,10 +15,13 @@ public class BindServiceTestActivity1 extends Activity implements View.OnClickLi
     private static final String TAG = "BindServiceTestActivity";
 
     private BindServieDemo1.BinderDemo1 mBinder;
-    private TextView textView;
+    private BindServieDemo1 mService;
+    private boolean bindIsConn = false;
 
+    private TextView text_display;
     private Button bt_register;
     private Button bt_unregister;
+    private Button bt_maxValue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +38,12 @@ public class BindServiceTestActivity1 extends Activity implements View.OnClickLi
 
     }
 
+    /**
+     * 可以看到，在使用这种方法进行客户端与服务端之间的交互是需要有一个强制类型转换的——在onServiceDisconnected()
+     * 中获得一个经过转换的IBinder对象，我们必须将其转换为service类中的Binder实例的类型才能正确的调用其方法。而这
+     * 强制类型转换其实就隐含了一个使用这种方法的条件：客户端和服务端应当在同一个进程中！不然在类型转换的时候也许会
+     * 出现问题——在另一个进程中一定有这个Binder实例么？没有的话就不能完成强制类型转换。
+     */
     private ServiceConnection mServiceConnection = new ServiceConnection() {
 
         //系统会调用该方法以传递服务的　onBind() 方法返回的 IBinder。
@@ -43,6 +52,8 @@ public class BindServiceTestActivity1 extends Activity implements View.OnClickLi
             Log.d(TAG, "onServiceConnected");
             //当系统调用 onServiceConnected() 回调方法时，我们可以使用接口定义的方法开始调用服务。
             mBinder = (BindServieDemo1.BinderDemo1) service;
+            mService = mBinder.getServer();
+            bindIsConn = true;
         }
 
         // Android系统会在与服务的连接意外中断时（例如当服务崩溃或被终止时）调用该方法。当客户端取消绑定时，系统
@@ -50,6 +61,7 @@ public class BindServiceTestActivity1 extends Activity implements View.OnClickLi
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.d(TAG, "onServiceDisconnected");
+            bindIsConn = false;
         }
     };
 
@@ -65,18 +77,20 @@ public class BindServiceTestActivity1 extends Activity implements View.OnClickLi
      */
 
     private void registerBindService() {
-        if(mBinder!=null) return;
+        if(bindIsConn) return;
         Intent mIntent = new Intent(this, BindServieDemo1.class);
         bindService(mIntent, mServiceConnection, BIND_AUTO_CREATE);
+        bindIsConn = true;
     }
 
     private void unRegisterBindService() {
-        if (mBinder == null) return;
+        if (!bindIsConn) return;
+        bindIsConn = false;
         unbindService(mServiceConnection);
     }
 
     private String getName() {
-        if (mBinder!=null) return mBinder.getName();
+        if (mBinder!=null) return mService.getName();
 
         return null;
     }
@@ -90,17 +104,28 @@ public class BindServiceTestActivity1 extends Activity implements View.OnClickLi
             case R.id.unregister:
                 unRegisterBindService();
                 break;
+            case R.id.bt_display:
+                text_display.setText(Integer.toString(mService.maxValue(1,2)));
+                break;
 
         }
     }
 
     private void initView()
     {
+
+
+        text_display = (TextView) findViewById(R.id.display);
+        //text_display.setOnClickListener(this);
+
         bt_register = (Button) findViewById(R.id.register);
         bt_register.setOnClickListener(this);
 
         bt_unregister = (Button) findViewById(R.id.unregister);
         bt_unregister.setOnClickListener(this);
+
+        bt_maxValue = (Button) findViewById(R.id.bt_display);
+        bt_maxValue.setOnClickListener(this);
     }
 
     @Override
