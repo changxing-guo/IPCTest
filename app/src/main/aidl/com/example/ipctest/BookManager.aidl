@@ -14,6 +14,11 @@ interface BookManager {
     //      double aDouble, String aString);
 
     List<Book> getBooks();
-
     void addBook(in Book book);
+    int getBookCount();
+    void setBookPrice(in Book book , int price);
+    void setBookName(in Book book , String name);
+    void addBookIn(in Book book);
+    void addBookOut(out Book book);
+    void addBookInout(inout Book book);
 }
